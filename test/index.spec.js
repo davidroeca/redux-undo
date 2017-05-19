@@ -181,7 +181,8 @@ function runTests (label, { undoableConfig = {}, initialStoreState, testConfig }
             present: initialStoreState,
             _latestUnfiltered: initialStoreState,
             future: [],
-            group: null
+            group: null,
+            previousMove: 0
           })
         }
       })
@@ -525,7 +526,9 @@ function runTests (label, { undoableConfig = {}, initialStoreState, testConfig }
           // redo
           const postRedoState = mockUndoableReducer(postUndoState, ActionCreators.redo())
           // redo should be ignored, because future state wasn't stored
-          expect(mockInitialState).to.deep.equal(postRedoState)
+          expect(mockInitialState.past).to.deep.equal(postRedoState.past)
+          expect(mockInitialState.present).to.deep.equal(postRedoState.present)
+          expect(mockInitialState.future).to.deep.equal(postRedoState.future)
         }
       })
     })
@@ -627,12 +630,16 @@ function runTests (label, { undoableConfig = {}, initialStoreState, testConfig }
         // skip this test if steps are filtered out,
         // because the double undo would be out of bounds and thus ignored
         if (testConfig && !testConfig.includeActions) {
-          expect(doubleUndoState).to.deep.equal(jumpToPastState)
+          expect(doubleUndoState.past).to.deep.equal(jumpToPastState.past)
+          expect(doubleUndoState.present).to.deep.equal(jumpToPastState.present)
+          expect(doubleUndoState.future).to.deep.equal(jumpToPastState.future)
         }
       })
 
       it('+2 steps should result in same state as two times redo', () => {
-        expect(doubleRedoState).to.deep.equal(jumpToFutureState)
+        expect(doubleRedoState.past).to.deep.equal(jumpToFutureState.past)
+        expect(doubleRedoState.present).to.deep.equal(jumpToFutureState.present)
+        expect(doubleRedoState.future).to.deep.equal(jumpToFutureState.future)
       })
 
       it('should do nothing if steps is 0', () => {

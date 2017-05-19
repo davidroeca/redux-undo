@@ -29,7 +29,8 @@ function insert (history, state, limit, group) {
     present: state,
     _latestUnfiltered: state,
     future: [],
-    group: group
+    group: group,
+    previousMove: 0
   }
 }
 
@@ -51,7 +52,8 @@ function undo (history) {
     present: newPresent, // set element as new present
     _latestUnfiltered: newPresent,
     future: newFuture,
-    group: null
+    group: null,
+    previousMove: -1
   }
 }
 
@@ -73,7 +75,8 @@ function redo (history) {
     present: newPresent, // set element as new present
     _latestUnfiltered: newPresent,
     past: newPast,
-    group: null
+    group: null,
+    previousMove: 1
   }
 }
 
@@ -91,8 +94,8 @@ function jumpToFuture (history, index) {
     present: newPresent,
     _latestUnfiltered: newPresent,
     past: past.concat([_latestUnfiltered]).concat(future.slice(0, index)),
-    group: null
-
+    group: null,
+    previousMove: index + 1
   }
 }
 
@@ -112,7 +115,8 @@ function jumpToPast (history, index) {
     present: newPresent,
     _latestUnfiltered: newPresent,
     past: past.slice(0, index),
-    group: null
+    group: null,
+    previousMove: index - past.length
   }
 }
 
@@ -132,13 +136,15 @@ function createHistory (state, ignoreInitialState) {
     past: [],
     present: state,
     future: [],
-    group: null
+    group: null,
+    previousMove: 0
   } : {
     past: [],
     present: state,
     _latestUnfiltered: state,
     future: [],
-    group: null
+    group: null,
+    previousMove: 0
   }
 }
 
@@ -188,7 +194,8 @@ export default function undoable (reducer, rawConfig = {}) {
           ? state : {
             ...state,
             _latestUnfiltered: state.present,
-            group: null
+            group: null,
+            previousMove: 0
           }
         debug.log('initialHistory initialized: initialState is a history', config.history)
       } else {
@@ -269,8 +276,11 @@ export default function undoable (reducer, rawConfig = {}) {
           // if filtering an action, merely update the present
           const filteredState = {
             ...history,
-            present: res,
-            group: null
+            present: res
+            // `previousMove` need not be set here, since filters are ignored
+            //   and filters inherently ignore the state changes
+            // `group` need not be set here since filtered actions between
+            //    should not break up the groupings
           }
           debug.log('filter ignored action, not storing it in past')
           debug.end(filteredState)
