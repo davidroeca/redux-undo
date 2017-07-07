@@ -4,7 +4,11 @@ import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import undoable, { ActionCreators } from 'redux-undo'
 
-const test = (state = {}, action) => {
+const initialTestState = {
+  greeting: 'hello'
+}
+
+const test = (state = initialTestState, action) => {
   switch(action.type) {
     case 'UPDATED':
       return {
@@ -26,9 +30,7 @@ const reducer = combineReducers({
 
 const initialState = {
   test: {
-    present: {
-      greeting: 'hello'
-    },
+    present: {...initialTestState},
     past: [],
     future: []
   }
