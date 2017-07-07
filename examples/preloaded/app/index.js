@@ -67,6 +67,9 @@ const actions = [
     type: 'UPDATED',
     values: {ooh: 'ah'}
   },
+  {
+    type: '@@redux-undo/INIT'
+  }
 ]
 
 for (let action of actions) {
